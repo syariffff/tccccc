@@ -1,0 +1,284 @@
+### API Testing - Laporan Management System
+### Base URL
+@baseUrl = http://localhost:5000
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwibmFtYSI6InNhcmlwIiwiZW1haWwiOiJzYXJpcEBnbWFpbC5jb20iLCJyb2xlIjoidXNlciIsImlhdCI6MTc0OTQ5MjU3OSwiZXhwIjoxNzQ5NDkzNDc5fQ.qmzHv3wQjPpvwS-nXTswkirKWqhdgsS6BkxR7vk3ocM
+
+#################################
+### AUTH ENDPOINTS
+#################################
+
+### Register User
+POST {{baseUrl}}/register
+Content-Type: application/json
+
+{
+  "nama": "ayas",
+  "email": "ayas@gmail.com",
+  "password": "123123",
+  "confirm_password": "123123",
+  "role": "admin"
+}
+
+### Login User
+POST {{baseUrl}}/login
+Content-Type: application/json
+
+{
+  "email": "sarip@gmail.com",
+  "password": "123123"
+}
+
+### Refresh Token
+GET {{baseUrl}}/token
+
+### Logout
+DELETE {{baseUrl}}/logout
+
+### Get User Profile
+GET {{baseUrl}}/users/profile
+Authorization: Bearer {{token}}
+
+### Get All Users (Admin only)
+GET {{baseUrl}}/users
+Authorization: Bearer {{token}}
+
+#################################
+### LAPORAN ENDPOINTS
+#################################
+
+### Get Dashboard Statistics
+GET {{baseUrl}}/laporan/stats
+
+### Get All Laporan
+GET {{baseUrl}}/laporan
+
+### Get All Laporan with Pagination and Filters
+GET {{baseUrl}}/laporan?page=1&limit=10&status=pending&prioritas=tinggi
+
+### Get All Laporan with Search
+GET {{baseUrl}}/laporan?search=laptop&page=1&limit=5
+
+### Get All Laporan with Multiple Filters
+GET {{baseUrl}}/laporan?status=proses&kategori_id=1&lokasi_id=2&prioritas=sedang&page=1&limit=10
+
+### Get Laporan by ID
+GET {{baseUrl}}/laporan/1
+
+### 15. CREATE New Laporan (Complete Data)
+POST {{baseUrl}}/laporan
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "judul": "tes",
+  "deskripsi": "Lampu penerangan jalan sudah mati sejak 3 hari yang lalu, menyebabkan area menjadi gelap dan tidak aman",
+  "kategori": "infrastruktur",
+  "lokasi": "Jl. Sudirman No. 45, Depok",
+  "pelapor_id": 1,
+  "prioritas": "tinggi",
+  "foto": "https://example.com/foto-lampu-mati.jpg"
+}
+
+### Create New Laporan with Photo (Multipart Form Data)
+# Note: For file upload, you need to use a tool like Postman or modify this request
+POST {{baseUrl}}/laporan
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data
+
+{
+  "judul": "Proyektor Rusak",
+  "deskripsi": "Proyektor di ruang meeting tidak menampilkan gambar",
+  "kategori_id": 1,
+  "lokasi_id": 2,
+  "pelapor_id": 1,
+  "prioritas": "sedang",
+  "foto": "@/path/to/image.jpg"
+}
+
+### Update Laporan (Full Update)
+PUT {{baseUrl}}/laporan/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "judul": "Laptop Tidak Bisa Nyala - Updated",
+  "deskripsi": "Laptop di ruang lab tidak bisa dinyalakan. Sudah dicek kabel power dan masih bermasalah.",
+  "kategori_id": 1,
+  "lokasi_id": 1,
+  "teknisi_id": 2,
+  "status": "proses",
+  "prioritas": "tinggi",
+  "biaya": 250000
+}
+
+### Update Laporan Status Only
+PATCH {{baseUrl}}/laporan/1/status
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "status": "proses",
+  "teknisi_id": 2
+}
+
+### Update Laporan Status to Completed
+PATCH {{baseUrl}}/laporan/1/status
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "status": "selesai",
+  "teknisi_id": 2,
+  "biaya": 350000
+}
+
+### Delete Laporan
+DELETE {{baseUrl}}/laporan/1
+Authorization: Bearer {{token}}
+
+#################################
+### LAPORAN SUMMARY ENDPOINTS
+#################################
+
+### Get Laporan Summary Statistics
+GET {{baseUrl}}/laporan-summary/stats
+
+### Get All Laporan Summary
+GET {{baseUrl}}/laporan-summary
+
+### Get All Laporan Summary with Filters
+GET {{baseUrl}}/laporan-summary?page=1&limit=5&status=pending
+
+### Get Laporan Summary by ID
+GET {{baseUrl}}/laporan-summary/1
+
+### Create New Laporan Summary
+POST {{baseUrl}}/laporan-summary
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "judul": "Summary Laporan Mingguan",
+  "deskripsi": "Ringkasan laporan untuk minggu ini",
+  "kategori_id": 1,
+  "lokasi_id": 1,
+  "pelapor_id": 1
+}
+
+### Update Laporan Summary
+PUT {{baseUrl}}/laporan-summary/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "judul": "Summary Laporan Mingguan - Updated",
+  "deskripsi": "Ringkasan laporan untuk minggu ini - sudah diupdate",
+  "kategori_id": 1,
+  "lokasi_id": 1
+}
+
+### Delete Laporan Summary
+DELETE {{baseUrl}}/laporan-summary/1
+Authorization: Bearer {{token}}
+
+#################################
+### HEALTH CHECK
+#################################
+
+### Health Check
+GET {{baseUrl}}/health
+
+#################################
+### ERROR TESTING
+#################################
+
+### Test 404 Error
+GET {{baseUrl}}/non-existent-endpoint
+
+### Test Invalid Token
+GET {{baseUrl}}/users/profile
+Authorization: Bearer invalid_token_here
+
+### Test Create Laporan without Required Fields
+POST {{baseUrl}}/laporan
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "deskripsi": "Missing judul field"
+}
+
+### Test Get Non-existent Laporan
+GET {{baseUrl}}/laporan/99999
+
+### Test Update Non-existent Laporan
+PUT {{baseUrl}}/laporan/99999
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "judul": "Test Update",
+  "deskripsi": "Test"
+}
+
+### Test Invalid Status Update
+PATCH {{baseUrl}}/laporan/1/status
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "status": "invalid_status"
+}
+
+#################################
+### TESTING SCENARIOS
+#################################
+
+### Scenario 1: Complete Workflow - Create Report to Completion
+# Step 1: Create new laporan
+POST {{baseUrl}}/laporan
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "judul": "Testing Workflow - Printer Error",
+  "deskripsi": "Printer di lantai 2 tidak bisa print, kertas selalu macet",
+  "kategori_id": 1,
+  "lokasi_id": 1,
+  "pelapor_id": 1,
+  "prioritas": "sedang"
+}
+
+### Step 2: Update status to "proses"
+PATCH {{baseUrl}}/laporan/2/status
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "status": "proses",
+  "teknisi_id": 2
+}
+
+### Step 3: Complete the report
+PATCH {{baseUrl}}/laporan/2/status
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "status": "selesai",
+  "teknisi_id": 2,
+  "biaya": 150000
+}
+
+### Step 4: Verify completion
+GET {{baseUrl}}/laporan/2
+
+#################################
+### PERFORMANCE TESTING
+#################################
+
+### Test Large Dataset Retrieval
+GET {{baseUrl}}/laporan?limit=100
+
+### Test Complex Filtering
+GET {{baseUrl}}/laporan?status=pending&prioritas=tinggi&search=laptop&kategori_id=1&lokasi_id=1&page=1&limit=20
